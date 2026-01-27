@@ -185,7 +185,13 @@ class SessionPayload(BaseModel):
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("home.html", {"request": request})
+
+@app.get("/session/{session_id}", response_class=HTMLResponse)
+async def read_app(request: Request, session_id: str):
+    # Retrieve session exists check could be done here, but we'll let the frontend do the heavy lifting for now
+    # or passing session_id to template to avoid URL parsing in JS
+    return templates.TemplateResponse("index.html", {"request": request, "session_id": session_id})
 
 @app.post("/sessions")
 async def create_session(payload: SessionPayload):
