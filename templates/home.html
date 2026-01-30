@@ -1,151 +1,98 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SplitDaBill - Home</title>
-    <style>
-        :root {
-            --accent: #222;
-            --text: #1a1a1a;
-            --bg: #fff;
-        }
+{% block title %}SplitDaBill - Home{% endblock %}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            color: var(--text);
-            text-align: center;
-        }
+{% block extra_css %}
+<style>
+    body {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        text-align: center;
+    }
 
-        h1 {
-            border-bottom: 3px solid var(--accent);
-            padding-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 800;
-            margin-top: 0;
-            font-size: 24px;
-            display: inline-block;
-        }
+    h1 {
+        display: inline-block;
+    }
 
-        .section-note {
-            font-size: 15px;
-            color: #666;
-            margin-bottom: 30px;
-            line-height: 1.5;
-        }
+    .section-note {
+        font-size: 15px;
+        color: #666;
+        margin-bottom: 30px;
+        line-height: 1.5;
+    }
 
-        .btn-calc {
-            padding: 18px 30px;
-            font-weight: 800;
-            font-size: 16px;
-            letter-spacing: 1px;
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            text-transform: uppercase;
-            border-radius: 4px;
-            transition: opacity 0.2s;
-        }
+    .spinner {
+        margin: 20px auto;
+        display: none;
+    }
+</style>
+{% endblock %}
 
-        .btn-calc:hover {
-            opacity: 0.9;
-        }
+{% block content %}
+<h1>SplitDaBill</h1>
 
-        /* Loading spinner */
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--accent);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-            display: none;
-        }
+<div id="homeContent">
+    <p class="section-note">
+        Create a new shared bill link, then send that link to your friends.<br>
+        Anyone with the link can edit the bill.
+    </p>
+    <button class="btn-calc" onclick="startNewBill()">
+        Create New Bill Link
+    </button>
+</div>
 
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
+<div class="spinner" id="loadingSpinner"></div>
+<div id="loadingText" style="display:none; color:#666; margin-top:10px;">Creating session...</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function startNewBill() {
+        // UI Update
+        document.getElementById('homeContent').style.display = 'none';
+        document.getElementById('loadingSpinner').style.display = 'block';
+        document.getElementById('loadingText').style.display = 'block';
+
+        // Default State
+        const state = {
+            billName: 'My Bill',
+            people: [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }, { id: 'p3', name: 'Charlie' }],
+            dishes: [{ id: 'd1', name: 'Pizza', price: 100 }, { id: 'd2', name: 'Drinks', price: 20 }],
+            ratios: {
+                p1: { d1: 1, d2: 1 },
+                p2: { d1: 1, d2: 0 },
+                p3: { d1: 0, d2: 1 }
+            },
+            payments: [{ person_id: 'p1', amount: 120 }],
+            paymentDetails: {},
+            covers: [],
+            colors: {}
+        };
+
+        try {
+            const res = await fetch('/sessions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ state })
+            });
+
+            if (!res.ok) {
+                throw new Error(await res.text());
             }
 
-            100% {
-                transform: rotate(360deg);
-            }
+            const data = await res.json();
+            // Redirect to the new app route
+            window.location.href = `/session/${data.id}`;
+
+        } catch (e) {
+            console.error(e);
+            alert('Failed to create session. Please try again.');
+            // Restore UI
+            document.getElementById('homeContent').style.display = 'block';
+            document.getElementById('loadingSpinner').style.display = 'none';
+            document.getElementById('loadingText').style.display = 'none';
         }
-    </style>
-</head>
-
-<body>
-
-    <h1>SplitDaBill</h1>
-
-    <div id="homeContent">
-        <p class="section-note">
-            Create a new shared bill link, then send that link to your friends.<br>
-            Anyone with the link can edit the bill.
-        </p>
-        <button class="btn-calc" onclick="startNewBill()">
-            Create New Bill Link
-        </button>
-    </div>
-
-    <div class="spinner" id="loadingSpinner"></div>
-    <div id="loadingText" style="display:none; color:#666; margin-top:10px;">Creating session...</div>
-
-    <script>
-        async function startNewBill() {
-            // UI Update
-            document.getElementById('homeContent').style.display = 'none';
-            document.getElementById('loadingSpinner').style.display = 'block';
-            document.getElementById('loadingText').style.display = 'block';
-
-            // Default State
-            const state = {
-                billName: 'My Bill',
-                people: [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }, { id: 'p3', name: 'Charlie' }],
-                dishes: [{ id: 'd1', name: 'Pizza', price: 100 }, { id: 'd2', name: 'Drinks', price: 20 }],
-                ratios: {
-                    p1: { d1: 1, d2: 1 },
-                    p2: { d1: 1, d2: 0 },
-                    p3: { d1: 0, d2: 1 }
-                },
-                payments: [{ person_id: 'p1', amount: 120 }],
-                paymentDetails: {},
-                covers: [],
-                colors: {}
-            };
-
-            try {
-                const res = await fetch('/sessions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ state })
-                });
-
-                if (!res.ok) {
-                    throw new Error(await res.text());
-                }
-
-                const data = await res.json();
-                // Redirect to the new app route
-                window.location.href = `/session/${data.id}`;
-
-            } catch (e) {
-                console.error(e);
-                alert('Failed to create session. Please try again.');
-                // Restore UI
-                document.getElementById('homeContent').style.display = 'block';
-                document.getElementById('loadingSpinner').style.display = 'none';
-                document.getElementById('loadingText').style.display = 'none';
-            }
-        }
-    </script>
-</body>
-
-</html>
+    }
+</script>
+{% endblock %}
