@@ -7,6 +7,11 @@ The application is a standard HTML/CSS/JS web app served via FastAPI templates.
     - **App**: `templates/index.html` (Served at `/session/{id}`)
 - **Styling**: Vanilla CSS (embedded in `<style>`).
 - **State Management**: Local JavaScript object `state` synced with the backend via API calls.
+- **Typography**:
+    - **Headers/Body**: `Public Sans` (800 / 400)
+    - **Inputs**: `IBM Plex Sans` (400)
+    - **Numerical Data**: `IBM Plex Mono` (500)
+    - **Micro-copy**: `Overpass` (600)
 
 ---
 
@@ -22,21 +27,25 @@ The UI is separated into two distinct pages:
     -   **Loading Screen** (`#loadingRoot`): Spinner shown during initial fetch.
 
 ### **Main Workspace Sections**
-| Section | ID | Description |
-| :--- | :--- | :--- |
-| **Header** | N/A | Contains "Bill Name" input, "New Bill" / "Copy Link" buttons, and **Mode Toggle**. <br> **Features**: <br> - **Mode Toggle**: Switches between "Basic" and "Advanced". <br> - **Bill Name**: Text input with "Bill Name" placeholder. Can be cleared (stays empty). <br> - **New Bill**: Redirects to Home to start fresh. <br> - **Copy Link**: Copies the current session URL. |
-| **Bill Details** | `#s1` | Matrix table for Dishes/People inputs. **Features**: <br> - **Basic Mode**: <br> - "Paid By" dropdown in Dish cell. <br> - Toggle buttons (✔) for eating.<br> - **Advanced Mode**: <br> - Numeric +/- inputs. |
-| **Payments** | `#s2` | List of payers. **Basic Mode**: HIDDEN (Auto-calculated from Sec 1). **Advanced Mode**: Visible manual entry. |
-| **Covers / Treats** | `#s3` | List of covers. **Basic Mode**: HIDDEN. **Advanced Mode**: Visible. |
-| **Final Results** | `#s4` | "Calculate Settlements" button and the results list showing who owes whom. |
-| **Backup** | `#s5` | JSON dump/load area for debugging or manual backup. |
+| Section | Description |
+| :--- | :--- |
+| **Header** | Contains "Bill Name" input, "New Bill" / "Copy Link" buttons, and **Mode Toggle**. <br> **Features**: <br> - **Mode Toggle**: Switches between "Basic" and "Advanced". <br> - **Bill Name**: Text input with "Bill Name" placeholder. Can be cleared (stays empty). <br> - **New Bill**: Instantly creates a new session via API and redirects. <br> - **Copy Link**: Copies the current session URL. |
+| **Bill Details** | `#s1`. Matrix table for Dishes/People inputs. **Features**: <br> - **Basic Mode**: <br> - "Paid By" dropdown in Dish cell. <br> - Colored tick marks (✔) for eating.<br> - **Advanced Mode**: <br> - Numeric +/- inputs. |
+| **Payments** | `#s2`. List of payers. **Basic Mode**: HIDDEN (Auto-calculated from Sec 1). **Advanced Mode**: Visible manual entry. |
+| **Covers / Treats** | `#s3`. List of covers. **Basic Mode**: HIDDEN. **Advanced Mode**: Visible. |
+| **Final Results** | `#s4`. "Calculate Settlements" button and the results list showing who owes whom. |
+| **Backup** | `#s5`. JSON dump/load area for debugging or manual backup. |
 
 ### **General Features**
+- **Color System**:
+    - 8 High-Contrast Colors: Red, Light Blue, Green, Orange, Purple, Indigo, Pink, Brown.
+    - Smart Reuse: Deleted person's color is immediately freed for new people.
+    - Assignment: Always picks the lowest available index in the palette.
 - **Live Warning System**: 
     - Automatically checks difference between Total Bill (Section 1) and Total Paid (Section 2).
     - If difference > 0.1, displays a warning in Section 2.
     - **Blocks Calculation**: Disables the "Calculate Settlements" button until the discrepancy is resolved.
-- **Input Guards**: Numeric fields (Prices, Amounts) block non-numeric keys to prevent invalid data.
+- **Input Guards**: Numeric fields (Prices, Amounts) block non-numeric keys.
 - **Clear Buttons ("x")**: 
     - Custom overlay button appearing on hover inside inputs (Bill Name, Person Name, Dish Price, etc.).
     - Clears the field immediately and updates the UI.
@@ -49,18 +58,21 @@ The UI is separated into two distinct pages:
 ## **3. User Experience (UX) Flow**
 
 ### **Session Management**
-- **New User**: Visits `/` (Home) -> Clicks "Create New Bill Link" -> `POST /sessions` -> Redirects to `/session/{uuid}`.
-- **Existing Link**: User visits `/session/{uuid}` -> App loads session data via `GET /sessions/{uuid}`.
+- **New User**: Visits `/` (Home) -> Clicks "Create New Bill Link" -> `POST /sessions` -> Redirects to `/session/{id}`.
+- **Existing Link**: User visits `/session/{id}` -> App loads session data via `GET /sessions/{id}`.
 - **Auto-Save**: Any change to data models (dishes, people, ratios, payments) triggers an `autoSave()` function (debounced 1s) to `PUT /sessions/{id}`.
 
 ### **Core Workflows**
 1.  **Adding Data**:
     - Users add dishes and people in Section 1.
-    - Matrix cells (`modRatio`) increment/decrement consumption.
-    - **Input Validation & UX for Section 1 (Consumption)**:
-        - **Dish Name**: 
-            - Textarea with 2-line visual limit (27px).
-            - Auto-shrinks font size (12px -> 9px) to fit text.
+    - **Defaults**: 
+        - New Dish: Consumed by all people.
+        - New Person: Consumes all existing dishes.
+    - **Matrix Styling**: 
+        - Checked: White background, colored border, colored tick icon.
+        - Unchecked: Light grey background.
+    - **Input Validation & UX**:
+        - **Dish Name**: Textarea with 2-line visual limit (27px). Auto-shrinks font size.
         - **Dish Price**: Number input with `validateNumberInput` guard.
         - **Add Dish**: Adds a new row and **auto-scrolls** the window down.
 2.  **Calculations**:
@@ -76,7 +88,7 @@ The app supports two modes, stored in `state.mode` (Bill-Based state):
 
 ### **Basic Mode** (Default)
 - **Philosophy**: Simple "I paid for this, you ate that".
-- **Consumption**: Binary (Eat/Don't Eat) via toggle buttons.
+- **Consumption**: Binary (Eat/Don't Eat) via matrix ticks.
 - **Payments**: "Paid By" dropdown located directly in the Dish cell. Payments are derived solely from this.
 - **Covers**: Disabled.
 - **Hidden Sections**: Section 2 (Who Paid) and Section 3 (Covers).

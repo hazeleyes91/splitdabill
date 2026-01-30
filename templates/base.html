@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SplitDaBill{% endblock %}</title>
+
+    <!-- Google Fonts: Public Sans, IBM Plex Mono, IBM Plex Sans, Overpass -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400&family=Overpass:wght@600&family=Public+Sans:wght@400;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            /* Shared Design Tokens */
+            --border: #e0e0e0;
+            --bg: #fff;
+            --text: #1a1a1a;
+            --accent: #222;
+            --subtle: #888;
+            --hover-bg: #f9f9f9;
+        }
+
+        body {
+            font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--text);
+            background: var(--bg);
+            box-sizing: border-box;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: inherit;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Public Sans', sans-serif;
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 800;
+        }
+
+        /* Input Fields: IBM Plex Sans */
+        input,
+        textarea,
+        select {
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+
+        /* Utility classes for specific font usage */
+        .font-mono {
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 500;
+        }
+
+        .font-micro {
+            font-family: 'Overpass', sans-serif;
+            font-weight: 600;
+            font-size: 10pt;
+            /* Micro-copy size */
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 24px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-top: 50px;
+            margin-bottom: 10px;
+        }
+
+        /* Shared Loading Spinner */
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Shared Button Style */
+        .btn-calc {
+            padding: 18px 30px;
+            font-weight: 800;
+            font-size: 16px;
+            letter-spacing: 1px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            border-radius: 4px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-calc:hover {
+            opacity: 0.9;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    {% block content %}{% endblock %}
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>
